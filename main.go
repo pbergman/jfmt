@@ -1,41 +1,41 @@
 package main
 
 import (
-    "os"
-    "fmt"
-    "encoding/json"
-    "text/template"
-    "bytes"
-    "regexp"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"os"
+	"regexp"
+	"text/template"
 )
 
 var (
-    version, ref string
+	version, ref string
 )
 
 func getData() interface{} {
 
-    var data interface{}
+	var data interface{}
 
-    fi, err := os.Stdin.Stat()
+	fi, err := os.Stdin.Stat()
 
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
-    if fi.Mode() & os.ModeCharDevice == 0 {
-        dec := json.NewDecoder(os.Stdin)
+	if fi.Mode()&os.ModeCharDevice == 0 {
+		dec := json.NewDecoder(os.Stdin)
 
-        if err := dec.Decode(&data); err != nil {
-            panic(err)
-        }
-    }
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+	}
 
-    return data
+	return data
 }
 
 func usage() {
-    fmt.Printf(`jfmt %[2]s(%[3]s)
+	fmt.Printf(`jfmt %[2]s(%[3]s)
 
 usage: %[1]s [-h|help] [template] <INPUT
 
@@ -50,57 +50,57 @@ echo '[{"name": "foo"},{"name": "bar"}]' | %[1]s '{{ range . }}{{ .names }}\n{{e
 
 func main() {
 
-    data := getData()
+	data := getData()
 
-    if len(os.Args) > 1 {
+	if len(os.Args) > 1 {
 
-        if os.Args[1] == "-h" || os.Args[1] == "help" {
-            usage()
-            return
-        }
+		if os.Args[1] == "-h" || os.Args[1] == "help" {
+			usage()
+			return
+		}
 
-        tmpl, err := template.New("out").Parse(os.Args[1])
+		tmpl, err := template.New("out").Parse(os.Args[1])
 
-        if err != nil {
-            panic(err)
-        }
+		if err != nil {
+			panic(err)
+		}
 
-        buf := new(bytes.Buffer)
+		buf := new(bytes.Buffer)
 
-        err = tmpl.Execute(buf, data)
+		err = tmpl.Execute(buf, data)
 
-        if err != nil {
-            panic(err)
-        }
+		if err != nil {
+			panic(err)
+		}
 
-        pattern := regexp.MustCompile(`\\[tnvf]`)
-        output := buf.String()
+		pattern := regexp.MustCompile(`\\[tnvf]`)
+		output := buf.String()
 
-        if pattern.MatchString(buf.String()) {
-            output = pattern.ReplaceAllStringFunc(output, func(match string) string {
-                switch match[1] {
-                case 't':
-                    return "\t";
-                case 'n':
-                    return "\n";
-                case 'v':
-                    return "\v";
-                case 'f':
-                    return "\f";
-                }
-                return "";
-            })
-        }
+		if pattern.MatchString(buf.String()) {
+			output = pattern.ReplaceAllStringFunc(output, func(match string) string {
+				switch match[1] {
+				case 't':
+					return "\t"
+				case 'n':
+					return "\n"
+				case 'v':
+					return "\v"
+				case 'f':
+					return "\f"
+				}
+				return ""
+			})
+		}
 
-        fmt.Print(output)
+		fmt.Print(output)
 
-    } else {
-        out, err := json.MarshalIndent(data, "", "    ")
+	} else {
+		out, err := json.MarshalIndent(data, "", "    ")
 
-        if err != nil {
-            panic(err)
-        }
+		if err != nil {
+			panic(err)
+		}
 
-        fmt.Println(string(out))
-    }
+		fmt.Println(string(out))
+	}
 }
