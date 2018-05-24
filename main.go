@@ -121,7 +121,7 @@ func main() {
 	data := getData()
 	args := os.Args[1:]
 
-	if size := len(args); size > 1 {
+	if size := len(args); size > 0 {
 		if hasHelp(size, args) {
 			usage()
 		} else {
