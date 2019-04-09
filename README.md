@@ -16,7 +16,7 @@ echo "[{"name": "foo"},{"name": "bar:}]" | jfmt "{{ range . }}>{{ .name }}\n{{en
 >bar
 ```
 
-or using the template blocks with multiple arguments:
+using the template blocks with multiple arguments:
 
 ```
 echo "[{"name": "foo"},{"name": "bar:}]" | jfmt '{{define "dumper"}}{{ . | dump }}{{end}}' '{{template "dumper" .}}'
@@ -28,4 +28,16 @@ echo "[{"name": "foo"},{"name": "bar:}]" | jfmt '{{define "dumper"}}{{ . | dump 
         "name": "bar"
     }
 ]
+```
+
+or with predefined templates:
+
+```
+# create default template folder
+[ ! -d "~/.config/jfmt/" ] && mkdir  ~/.config/jfmt/
+# create a template
+echo '{{define "dumper"}}{{ . | dump }}{{end}}' >  ~/.config/jfmt/dumper.tmpl
+# print output
+echo "[{"name": "foo"},{"name": "bar:}]" | jfmt '{{template "dumper" .}}'
+
 ```
